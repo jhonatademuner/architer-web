@@ -91,10 +91,6 @@ export function ChatInterface() {
     }
   }
 
-  const resetChat = () => {
-    setMessages(INITIAL_MESSAGES)
-  }
-
   return (
     <div className="flex flex-col h-full">
       <ScrollArea className="flex-1 p-4">
@@ -129,12 +125,6 @@ export function ChatInterface() {
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
-
-      <div className="p-4 border-t border-border bg-background flex justify-between items-center">
-        <Button variant="outline" size="sm" onClick={resetChat}>
-          Reset Chat
-        </Button>
-      </div>
 
       <div className="p-4 border-t border-border bg-background">
         <div className="flex space-x-2">

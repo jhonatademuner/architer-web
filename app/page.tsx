@@ -10,7 +10,7 @@ import { ChevronRight, MessageSquare } from "lucide-react"
 
 export default function Home() {
   const [isChatOpen, setIsChatOpen] = useState(true)
-  const [chatWidth, setChatWidth] = useState(33) // percentage
+  const [chatWidth, setChatWidth] = useState(20) // percentage
   const resizeRef = useRef<HTMLDivElement>(null)
   const [isResizing, setIsResizing] = useState(false)
 
