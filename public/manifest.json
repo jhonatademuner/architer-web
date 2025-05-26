@@ -1,0 +1,19 @@
+{
+    "name": "Archter",
+    "version": "1.0.0",
+    "description": "Extension to interact with System Design AI Interviewer",
+    "manifest_version": 3,
+    "author": "Jhonata Demuner",
+    "action":{
+        "default_popup": "index.html",
+        "default_title": "System Design AI Interviewer"
+    },
+    "permissions": [
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ]
+}
