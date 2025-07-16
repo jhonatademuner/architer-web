@@ -2,7 +2,6 @@
 
 # dependencies
 /node_modules
-package-lock.json
 
 # next.js
 /.next/
@@ -10,7 +9,6 @@ package-lock.json
 
 # production
 /build
-/dist
 
 # debug
 npm-debug.log*
@@ -28,3 +26,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+package-lock.json
