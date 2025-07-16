@@ -41,9 +41,9 @@ export function Navigation({ isLoggedIn = false, userCredits = 0 }: NavigationPr
                 Home
               </Link>
               <Link
-                href="/create"
+                href="/interview/create"
                 className={`transition-colors hover:text-foreground/80 ${
-                  pathname === "/create" ? "text-foreground" : "text-foreground/60"
+                  pathname === "/interview/create" ? "text-foreground" : "text-foreground/60"
                 }`}
               >
                 Create Interview
@@ -71,7 +71,7 @@ export function Navigation({ isLoggedIn = false, userCredits = 0 }: NavigationPr
                 </Badge>
               </div>
 
-              <Link href="/create">
+              <Link href="/interview/create">
                 <Button size="sm" className="h-8">
                   <LuPlus className="h-4 w-4 mr-1" />
                   New Interview
