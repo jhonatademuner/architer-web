@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -13,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Navigation } from "@/components/navigation"
 import { LuArrowLeft, LuGithub, LuEye, LuEyeOff } from "react-icons/lu";
 import { IoLogoGoogle } from "react-icons/io5";
+import { auth } from '@/lib/auth'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -25,11 +24,13 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Mock login - in real app, you'd authenticate here
-    setTimeout(() => {
-      setIsLoading(false)
-      router.push("/home")
-    }, 1000)
+    await auth.login({
+      email,
+      password,
+    })
+
+    setIsLoading(false)
+    router.push("/home")
   }
 
   return (
@@ -55,7 +56,7 @@ export default function LoginPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Social Login */}
-              <div className="space-y-3">
+              {/* <div className="space-y-3">
                 <Button variant="outline" className="w-full bg-transparent" disabled>
                   <LuGithub className="w-4 h-4 mr-2" />
                   Continue with GitHub
@@ -73,7 +74,7 @@ export default function LoginPage() {
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Email/Password Form */}
               <form onSubmit={handleSubmit} className="space-y-4">

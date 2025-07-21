@@ -11,7 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LuMoon, LuSun, LuUser, LuSettings, LuLogOut, LuCreditCard, LuPlus } from "react-icons/lu";
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { auth } from '@/lib/auth'
 
 interface NavigationProps {
   isLoggedIn?: boolean
@@ -19,6 +20,7 @@ interface NavigationProps {
 }
 
 export function Navigation({ isLoggedIn = false, userCredits = 0 }: NavigationProps) {
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
   const pathname = usePathname()
 
@@ -109,10 +111,13 @@ export function Navigation({ isLoggedIn = false, userCredits = 0 }: NavigationPr
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/">
+                    <button onClick={async () => {
+                      await auth.logout()
+                      router.push("/")
+                    }}>
                       <LuLogOut className="mr-2 h-4 w-4" />
                       Log out
-                    </Link>
+                    </button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

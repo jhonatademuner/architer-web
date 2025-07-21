@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Navigation } from "@/components/navigation"
 import { LuArrowLeft, LuCircleCheckBig, LuGithub, LuEye, LuEyeOff } from "react-icons/lu";
 import { IoLogoGoogle } from "react-icons/io5";
+import { auth } from '@/lib/auth'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -32,21 +33,36 @@ export default function SignupPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Mock signup - in real app, you'd create account here
-    setTimeout(() => {
-      setIsLoading(false)
-      router.push("/home")
-    }, 1000)
+    await auth.register({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    })
+
+    setIsLoading(false)
+    router.push("/login")
   }
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
+  const validatePassword = (value: string, confirmValue: string) => ({
+    length: value.length >= 8,
+    number: /\d/.test(value),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(value),
+    uppercase: /[A-Z]/.test(value),
+    match: value.length > 0 && value === confirmValue,
+  })
+
+  const passwordChecks = validatePassword(formData.password, formData.confirmPassword)
+  const isPasswordValid = Object.values(passwordChecks).every(Boolean)
+
   const isFormValid =
     formData.name &&
     formData.email &&
     formData.password &&
+    isPasswordValid &&
     formData.password === formData.confirmPassword &&
     formData.agreeToTerms
 
@@ -92,7 +108,7 @@ export default function SignupPage() {
               </div>
 
               {/* Social Signup */}
-              <div className="space-y-3">
+              {/* <div className="space-y-3">
                 <Button variant="outline" className="w-full bg-transparent" disabled>
                   <LuGithub className="w-4 h-4 mr-2" />
                   Continue with GitHub
@@ -110,7 +126,7 @@ export default function SignupPage() {
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Signup Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -193,6 +209,30 @@ export default function SignupPage() {
                         <LuEye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </Button>
+                  </div>
+                </div>
+
+                {/* Password requirements */}
+                <div className="text-muted-foreground text-xs flex flex-col gap-1 px-1">
+                  <div className="flex items-center gap-2">
+                    <div className={`h-2 w-2 rounded-full ${passwordChecks.uppercase ? "bg-green-500" : "bg-red-400"}`} />
+                    At least one uppercase letter
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`h-2 w-2 rounded-full ${passwordChecks.special ? "bg-green-500" : "bg-red-400"}`} />
+                    At least one special character
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`h-2 w-2 rounded-full ${passwordChecks.number ? "bg-green-500" : "bg-red-400"}`} />
+                    At least one number
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`h-2 w-2 rounded-full ${passwordChecks.length ? "bg-green-500" : "bg-red-400"}`} />
+                    At least 8 characters
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`h-2 w-2 rounded-full ${passwordChecks.match ? "bg-green-500" : "bg-red-400"}`} />
+                    Passwords match
                   </div>
                 </div>
 
