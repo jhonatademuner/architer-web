@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,10 @@ import { Navigation } from "@/components/navigation"
 import { LuSearch, LuArrowLeft, LuPlay, LuClock, LuUsers, LuZap, LuTarget, LuMessageSquare, LuBrain, LuShield, LuRocket } from "react-icons/lu"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import api from '@/lib/axios'
+import { iconConverter } from '@/utils/icons';
+import { Challenge } from '@/types/challenge'
+import { Behavior } from "@/types/behavior"
 
 export default function CreateInterviewPage() {
   const router = useRouter()
@@ -16,116 +20,49 @@ export default function CreateInterviewPage() {
   const [selectedChallenge, setSelectedChallenge] = useState("")
   const [selectedBehavior, setSelectedBehavior] = useState("")
   const [selectedSeniority, setSelectedSeniority] = useState("")
+  const [challenges, setChallenges] = useState<Challenge[]>([])
+  const [behaviors, setBehaviors] = useState<Behavior[]>([])
 
-  const challenges = [
-    {
-      id: "youtube",
-      title: "Design YouTube",
-      description: "Build a video streaming platform with upload, playback, and recommendations",
-      category: "Video Streaming",
-      difficulty: "Hard",
-      estimatedTime: "45-60 min",
-      icon: "🎥",
-    },
-    {
-      id: "twitter",
-      title: "Design Twitter",
-      description: "Create a social media platform with tweets, timeline, and real-time updates",
-      category: "Social Media",
-      difficulty: "Hard",
-      estimatedTime: "45-60 min",
-      icon: "🐦",
-    },
-    {
-      id: "rate-limiter",
-      title: "Design Rate Limiter",
-      description: "Implement a distributed rate limiting system to control API usage",
-      category: "System Components",
-      difficulty: "Medium",
-      estimatedTime: "30-45 min",
-      icon: "⚡",
-    },
-    {
-      id: "chat-system",
-      title: "Design Chat System",
-      description: "Build a real-time messaging platform with group chats and notifications",
-      category: "Real-time Systems",
-      difficulty: "Medium",
-      estimatedTime: "40-50 min",
-      icon: "💬",
-    },
-    {
-      id: "url-shortener",
-      title: "Design URL Shortener",
-      description: "Create a service like bit.ly with custom URLs and analytics",
-      category: "Web Services",
-      difficulty: "Easy",
-      estimatedTime: "25-35 min",
-      icon: "🔗",
-    },
-    {
-      id: "notification",
-      title: "Design Notification System",
-      description: "Build a multi-channel notification service with preferences and delivery",
-      category: "System Components",
-      difficulty: "Medium",
-      estimatedTime: "35-45 min",
-      icon: "🔔",
-    },
-    {
-      id: "search-engine",
-      title: "Design Search Engine",
-      description: "Create a web search engine with crawling, indexing, and ranking",
-      category: "Search Systems",
-      difficulty: "Hard",
-      estimatedTime: "50-70 min",
-      icon: "🔍",
-    },
-    {
-      id: "cache-system",
-      title: "Design Distributed Cache",
-      description: "Implement a high-performance caching layer with consistency guarantees",
-      category: "System Components",
-      difficulty: "Medium",
-      estimatedTime: "30-40 min",
-      icon: "⚡",
-    },
-  ]
+  // Fetch challenges from API 
+  useEffect(() => {
+    const fetchChallenges = async () => {
+      const response = await api.get<Challenge[]>("/v1/challenges")
+      setChallenges(response.data)
+    }
+    fetchChallenges()
+  }, [])
 
-  const behaviors = [
-    {
-      id: "friendly",
-      title: "Friendly",
-      description: "Encouraging and supportive, helps guide you through the process",
-      icon: LuMessageSquare,
-      color: "from-green-500/20 to-emerald-500/20 border-green-500/30",
-    },
-    {
-      id: "socratic",
-      title: "Socratic",
-      description: "Asks probing questions to help you discover solutions yourself",
-      icon: LuBrain,
-      color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30",
-    },
-    {
-      id: "tough",
-      title: "Tough",
-      description: "Challenging and direct, pushes you to think deeper and justify decisions",
-      icon: LuTarget,
-      color: "from-red-500/20 to-orange-500/20 border-red-500/30",
-    },
-    {
-      id: "neutral",
-      title: "Professional",
-      description: "Balanced and objective, focuses on technical accuracy and best practices",
-      icon: LuShield,
-      color: "from-purple-500/20 to-violet-500/20 border-purple-500/30",
-    },
-  ]
+  // Fetch behaviors from API
+  useEffect(() => {
+    const fetchBehaviors = async () => {
+      const response = await api.get<Behavior[]>("/v1/behaviors")
+      setBehaviors(response.data)
+    }
+    fetchBehaviors()
+  }, [])
+
+  const getColorFromId = (id: string) => {
+    const colors = [
+      'from-green-500/20 to-emerald-500/20 border-green-500/30',
+      'from-blue-500/20 to-cyan-500/20 border-blue-500/30',
+      'from-purple-500/20 to-violet-500/20 border-purple-500/30',
+      'from-red-500/20 to-orange-500/20 border-red-500/30',
+    ]
+    const hash = [...id].reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    return colors[hash % colors.length]
+  }
+
+  const filteredChallenges = challenges.filter(
+    (challenge) =>
+      challenge.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      challenge.overview.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      challenge.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      challenge.difficulty.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const seniorities = [
     {
-      id: "junior",
+      id: "JUNIOR",
       title: "Junior",
       description: "Entry-level questions focusing on basic concepts and simple architectures",
       experience: "0-2 years",
@@ -133,7 +70,7 @@ export default function CreateInterviewPage() {
       color: "from-green-500/20 to-emerald-500/20 border-green-500/30",
     },
     {
-      id: "mid-level",
+      id: "MID",
       title: "Mid-Level",
       description: "Intermediate complexity with trade-offs and moderate scale considerations",
       experience: "2-5 years",
@@ -141,7 +78,7 @@ export default function CreateInterviewPage() {
       color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30",
     },
     {
-      id: "senior",
+      id: "SENIOR",
       title: "Senior",
       description: "Advanced topics including scalability, reliability, and complex trade-offs",
       experience: "5-8 years",
@@ -149,7 +86,7 @@ export default function CreateInterviewPage() {
       color: "from-purple-500/20 to-violet-500/20 border-purple-500/30",
     },
     {
-      id: "architect",
+      id: "ARCHITECT",
       title: "Architect",
       description: "Expert-level design with enterprise scale, multiple systems integration",
       experience: "8+ years",
@@ -157,13 +94,6 @@ export default function CreateInterviewPage() {
       color: "from-orange-500/20 to-red-500/20 border-orange-500/30",
     },
   ]
-
-  const filteredChallenges = challenges.filter(
-    (challenge) =>
-      challenge.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      challenge.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      challenge.category.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -181,11 +111,12 @@ export default function CreateInterviewPage() {
   const isFormValid = selectedChallenge && selectedBehavior && selectedSeniority
 
   const handleStartInterview = () => {
-    if (isFormValid) {
-      router.push(
-        `/interview/active?challenge=${selectedChallenge}&behavior=${selectedBehavior}&seniority=${selectedSeniority}`,
-      )
-    }
+    // if (isFormValid) {
+    //   router.push(
+    //     `/interview/active?challenge=${selectedChallenge}&behavior=${selectedBehavior}&seniority=${selectedSeniority}`,
+    //   )
+    // }
+    console.log("Starting interview with:", { selectedChallenge, selectedBehavior, selectedSeniority })
   }
 
   return (
@@ -233,27 +164,25 @@ export default function CreateInterviewPage() {
                     <Card
                       key={challenge.id}
                       className={`cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedChallenge === challenge.id
-                          ? "border-primary bg-primary/5"
-                          : "border-border/50 bg-card/30 hover:bg-card/50"
+                        ? "border-primary bg-primary/5"
+                        : "border-border/50 bg-card/30 hover:bg-card/50"
                         }`}
                       onClick={() => setSelectedChallenge(challenge.id)}
                     >
                       <CardContent className="p-6 space-y-3">
                         <div className="flex items-start justify-between">
-                          <div className="text-2xl">{challenge.icon}</div>
+                          <div className="text-2xl">
+                            {iconConverter(challenge.icon)}
+                          </div>
                           <Badge variant="outline" className={getDifficultyColor(challenge.difficulty)}>
                             {challenge.difficulty}
                           </Badge>
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg">{challenge.title}</h3>
-                          <p className="text-sm text-muted-foreground mt-1">{challenge.description}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{challenge.overview}</p>
                         </div>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <div className="flex items-center">
-                            <LuClock className="w-3 h-3 mr-1" />
-                            {challenge.estimatedTime}
-                          </div>
+                        <div className="flex items-center justify-end text-xs text-muted-foreground">
                           <Badge variant="secondary" className="text-xs">
                             {challenge.category}
                           </Badge>
@@ -279,19 +208,19 @@ export default function CreateInterviewPage() {
                     <Card
                       key={behavior.id}
                       className={`cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedBehavior === behavior.id
-                          ? "border-primary bg-primary/5"
-                          : "border-border/50 bg-card/30 hover:bg-card/50"
+                        ? "border-primary bg-primary/5"
+                        : "border-border/50 bg-card/30 hover:bg-card/50"
                         }`}
                       onClick={() => setSelectedBehavior(behavior.id)}
                     >
-                      <CardContent className={`p-6 space-y-3 bg-gradient-to-br ${behavior.color} rounded-lg border`}>
+                      <CardContent className={`p-6 space-y-3 bg-gradient-to-br ${getColorFromId(behavior.id)} rounded-lg border`}>
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-background/50 rounded-lg">
-                            <behavior.icon className="w-5 h-5" />
+                            {iconConverter(behavior.icon)}
                           </div>
                           <h3 className="font-semibold">{behavior.title}</h3>
                         </div>
-                        <p className="text-sm text-muted-foreground">{behavior.description}</p>
+                        <p className="text-sm text-muted-foreground">{behavior.overview}</p>
                       </CardContent>
                     </Card>
                   ))}
@@ -313,8 +242,8 @@ export default function CreateInterviewPage() {
                     <Card
                       key={seniority.id}
                       className={`cursor-pointer transition-all duration-200 hover:scale-[1.02] ${selectedSeniority === seniority.id
-                          ? "border-primary bg-primary/5"
-                          : "border-border/50 bg-card/30 hover:bg-card/50"
+                        ? "border-primary bg-primary/5"
+                        : "border-border/50 bg-card/30 hover:bg-card/50"
                         }`}
                       onClick={() => setSelectedSeniority(seniority.id)}
                     >
@@ -368,15 +297,6 @@ export default function CreateInterviewPage() {
                       {selectedSeniority ? seniorities.find((s) => s.id === selectedSeniority)?.title : "Not selected"}
                     </p>
                   </div>
-
-                  {selectedChallenge && (
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Estimated Time</label>
-                      <p className="text-sm mt-1">
-                        {challenges.find((c) => c.id === selectedChallenge)?.estimatedTime}
-                      </p>
-                    </div>
-                  )}
                 </div>
 
                 <div className="pt-4 border-t border-border/50">
