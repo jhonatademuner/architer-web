@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Navigation } from "@/components/navigation"
-import { LuSearch, LuArrowLeft, LuPlay, LuClock, LuUsers, LuZap, LuTarget, LuMessageSquare, LuBrain, LuShield, LuRocket } from "react-icons/lu"
+import { LuSearch, LuArrowLeft, LuPlay, LuUsers, LuZap, LuTarget, LuRocket } from "react-icons/lu"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import api from '@/lib/axios'
 import { iconConverter } from '@/utils/icons';
 import { Challenge } from '@/types/challenge'
 import { Behavior } from "@/types/behavior"
+import { SimplifiedInterview } from "@/types/interview"
 
 export default function CreateInterviewPage() {
   const router = useRouter()
@@ -110,13 +111,17 @@ export default function CreateInterviewPage() {
 
   const isFormValid = selectedChallenge && selectedBehavior && selectedSeniority
 
-  const handleStartInterview = () => {
-    // if (isFormValid) {
-    //   router.push(
-    //     `/interview/active?challenge=${selectedChallenge}&behavior=${selectedBehavior}&seniority=${selectedSeniority}`,
-    //   )
-    // }
-    console.log("Starting interview with:", { selectedChallenge, selectedBehavior, selectedSeniority })
+  const handleStartInterview = async () => {
+    if (isFormValid) {
+      const response = await api.post<SimplifiedInterview>("/v1/interviews", {
+        challenge: selectedChallenge,
+        behavior: selectedBehavior,
+        seniority: selectedSeniority,
+      })
+      router.push(
+        `/interview/active/${response.data.id}`,
+      )
+    }
   }
 
   return (

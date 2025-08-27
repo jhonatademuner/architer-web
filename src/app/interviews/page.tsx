@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,79 +9,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Navigation } from "@/components/navigation"
 import { LuArrowLeft, LuSearch, LuEye, LuCalendar, LuClock, LuTarget, LuTrendingUp, LuFilter } from "react-icons/lu"
 import Link from "next/link"
+import { SimplifiedInterview } from "@/types/interview"
+import api from "@/lib/axios"
 
 export default function InterviewsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [filterSeniority, setFilterSeniority] = useState("all")
+  const [interviews, setInterviews] = useState<SimplifiedInterview[]>([])
 
-  // Mock interview data
-  const interviews = [
-    {
-      id: 1,
-      challenge: "Design YouTube",
-      seniority: "Senior",
-      behavior: "Socratic",
-      score: 92,
-      date: "2024-01-15",
-      duration: "45 min",
-      status: "completed",
-      phase: "wrap-up",
-    },
-    {
-      id: 2,
-      challenge: "Design Rate Limiter",
-      seniority: "Mid-level",
-      behavior: "Friendly",
-      score: 88,
-      date: "2024-01-14",
-      duration: "38 min",
-      status: "completed",
-      phase: "wrap-up",
-    },
-    {
-      id: 3,
-      challenge: "Design Twitter",
-      seniority: "Senior",
-      behavior: "Professional",
-      score: 85,
-      date: "2024-01-12",
-      duration: "52 min",
-      status: "completed",
-      phase: "wrap-up",
-    },
-    {
-      id: 4,
-      challenge: "Design Chat System",
-      seniority: "Mid-level",
-      behavior: "Tough",
-      score: 78,
-      date: "2024-01-10",
-      duration: "41 min",
-      status: "completed",
-      phase: "wrap-up",
-    },
-    {
-      id: 5,
-      challenge: "Design URL Shortener",
-      seniority: "Junior",
-      behavior: "Friendly",
-      score: 95,
-      date: "2024-01-08",
-      duration: "32 min",
-      status: "completed",
-      phase: "wrap-up",
-    },
-  ]
+  useEffect(() => {
+    const fetchRecentInterviews = async () => {
+      const response = await api.get<SimplifiedInterview[]>("/v1/interviews?page=0&size=10")
+      setInterviews(response.data)
+    }
+
+    fetchRecentInterviews()
+  }, [])
 
   const filteredInterviews = interviews.filter((interview) => {
     const matchesSearch =
-      interview.challenge.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      interview.behavior.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === "all" || interview.status === filterStatus
+      interview.challengeTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      interview.behaviorTitle.toLowerCase().includes(searchTerm.toLowerCase())
+    // const matchesStatus = filterStatus === "all" || interview.status === filterStatus
     const matchesSeniority = filterSeniority === "all" || interview.seniority.toLowerCase() === filterSeniority
 
-    return matchesSearch && matchesStatus && matchesSeniority
+    return matchesSearch && matchesSeniority
   })
 
   const getScoreColor = (score: number) => {
@@ -102,14 +55,9 @@ export default function InterviewsPage() {
   }
 
   // Calculate stats
-  const totalInterviews = interviews.length
-  const averageScore = Math.round(interviews.reduce((sum, interview) => sum + interview.score, 0) / totalInterviews)
-  const completedThisWeek = interviews.filter(interview => {
-    const interviewDate = new Date(interview.date)
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 7)
-    return interviewDate >= weekAgo
-  }).length
+  const totalInterviews = 999
+  const averageScore = 999
+  const completedThisWeek = 999
 
   return (
     <div className="min-h-screen bg-background">
@@ -222,34 +170,32 @@ export default function InterviewsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-4 mb-3">
-                      <h3 className="text-lg font-semibold">{interview.challenge}</h3>
+                      <h3 className="text-lg font-semibold">{interview.challengeTitle}</h3>
                       <Badge variant="outline" className={getSeniorityColor(interview.seniority)}>
                         {interview.seniority}
                       </Badge>
-                      <Badge variant="secondary">{interview.behavior}</Badge>
+                      <Badge variant="secondary">{interview.behaviorTitle}</Badge>
                       <Badge variant="outline" className="text-green-400 border-green-500/20">
                         Completed
                       </Badge>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center">
-                        <LuCalendar className="w-4 h-4 mr-2" />
-                        {interview.date}
-                      </div>
+                      {interview.createdAt && (
+                        <div className="flex items-center">
+                          <LuCalendar className="w-4 h-4 mr-2" />
+                          {new Date(interview.createdAt).toLocaleDateString()} - {new Date(interview.createdAt).toLocaleTimeString()}
+                        </div>
+                      )}
                       <div className="flex items-center">
                         <LuClock className="w-4 h-4 mr-2" />
-                        {interview.duration}
+                        {interview.timeSpent}
                       </div>
                       <div className="flex items-center">
                         <LuTarget className="w-4 h-4 mr-2" />
-                        <span className={`font-medium ${getScoreColor(interview.score)}`}>
-                          {interview.score}% Score
+                        <span className={`font-medium ${getScoreColor(interview.score || 0)}`}>
+                          {interview.score || 0}% Score
                         </span>
-                      </div>
-                      <div className="flex items-center">
-                        <LuTrendingUp className="w-4 h-4 mr-2" />
-                        Phase: {interview.phase}
                       </div>
                     </div>
                   </div>

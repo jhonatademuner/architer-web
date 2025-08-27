@@ -1,15 +1,30 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Navigation } from "@/components/navigation"
-import { LuPlus, LuZap, LuChartColumn, LuTarget, LuAward, LuClock, LuArrowRight, LuTrendingUp, LuCircleCheckBig, LuCalendar} from "react-icons/lu";
+import { LuPlus, LuZap, LuChartColumn, LuTarget, LuAward, LuClock, LuArrowRight, LuTrendingUp, LuCircleCheckBig, LuCalendar } from "react-icons/lu";
 
 import Link from "next/link"
+import { SimplifiedInterview } from "@/types/interview"
+import api from "@/lib/axios"
 
 export default function HomePage() {
+  const [recentInterviews, setRecentInterviews] = useState<SimplifiedInterview[]>([])
+
+  // Fetch recent interviews
+  useEffect(() => {
+    const fetchRecentInterviews = async () => {
+      const response = await api.get<SimplifiedInterview[]>("/v1/interviews?page=0&size=5")
+      setRecentInterviews(response.data)
+    }
+
+    fetchRecentInterviews()
+  }, [])
+
   // Mock user data
   const user = {
     name: "Alex Chen",
@@ -21,36 +36,6 @@ export default function HomePage() {
     nextLevel: "Architect",
     progressToNext: 75,
   }
-
-  const recentInterviews = [
-    {
-      id: 1,
-      challenge: "Design YouTube",
-      seniority: "Senior",
-      behavior: "Socratic",
-      score: 92,
-      date: "2024-01-15",
-      status: "completed",
-    },
-    {
-      id: 2,
-      challenge: "Design Rate Limiter",
-      seniority: "Mid-level",
-      behavior: "Friendly",
-      score: 88,
-      date: "2024-01-14",
-      status: "completed",
-    },
-    {
-      id: 3,
-      challenge: "Design Twitter",
-      seniority: "Senior",
-      behavior: "Tough",
-      score: 85,
-      date: "2024-01-12",
-      status: "completed",
-    },
-  ]
 
   const weeklyStats = [
     { day: "Mon", interviews: 2 },
@@ -64,7 +49,8 @@ export default function HomePage() {
 
   const maxInterviews = Math.max(...weeklyStats.map((stat) => stat.interviews))
 
-  const getScoreColor = (score: number) => {
+  const getScoreColor = (score: number | undefined) => {
+    if (score === undefined) return "text-gray-400"
     if (score >= 90) return "text-green-400"
     if (score >= 80) return "text-blue-400"
     if (score >= 70) return "text-yellow-400"
@@ -164,15 +150,17 @@ export default function HomePage() {
                     className="flex items-center justify-between p-4 bg-accent/20 rounded-lg border border-border/50"
                   >
                     <div className="space-y-1">
-                      <h4 className="font-medium">{interview.challenge}</h4>
+                      <h4 className="font-medium">{interview.challengeTitle}</h4>
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                         <Badge variant="outline" className={getSeniorityColor(interview.seniority)}>
                           {interview.seniority}
                         </Badge>
                         <span>•</span>
-                        <span>{interview.behavior}</span>
+                        <span>{interview.behaviorTitle}</span>
                         <span>•</span>
-                        <span>{interview.date}</span>
+                        {interview.createdAt && (
+                          <span>{new Date(interview.createdAt).toLocaleDateString()} - {new Date(interview.createdAt).toLocaleTimeString()}</span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -185,7 +173,7 @@ export default function HomePage() {
             </Card>
 
             {/* Weekly Activity */}
-            <Card className="border-border/50 bg-card/50 backdrop-blur">
+            {/* <Card className="border-border/50 bg-card/50 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <LuCalendar className="w-5 h-5 mr-2 text-primary" />
@@ -211,13 +199,13 @@ export default function HomePage() {
                   Total interviews this week: {weeklyStats.reduce((sum, stat) => sum + stat.interviews, 0)}
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Stats Overview */}
-            <Card className="border-border/50 bg-card/50 backdrop-blur">
+            {/* <Card className="border-border/50 bg-card/50 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <LuTarget className="w-5 h-5 mr-2 text-primary" />
@@ -244,10 +232,10 @@ export default function HomePage() {
                   <p className="text-xs text-muted-foreground">Keep it up!</p>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Level Progress */}
-            <Card className="border-border/50 bg-card/50 backdrop-blur">
+            {/* <Card className="border-border/50 bg-card/50 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <LuTrendingUp className="w-5 h-5 mr-2 text-primary" />
@@ -274,10 +262,10 @@ export default function HomePage() {
                   Complete more interviews to reach {user.nextLevel} level
                 </p>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Credits */}
-            <Card className="border-border/50 bg-gradient-to-br from-blue-500/10 to-purple-600/10 backdrop-blur">
+            {/* <Card className="border-border/50 bg-gradient-to-br from-blue-500/10 to-purple-600/10 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <LuZap className="w-5 h-5 mr-2 text-primary" />
@@ -298,7 +286,7 @@ export default function HomePage() {
                   Each credit allows one complete interview session
                 </p>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </main>
